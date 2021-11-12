@@ -10,8 +10,10 @@ import (
 )
 
 type session struct {
-	tags         []string
-	nextQuestion int
+	id            int64
+	tags          []string
+	nextQuestion  int
+	waitingAnswer bool
 }
 
 type sessions map[int64]session
@@ -68,6 +70,7 @@ func (t teleBot) Start() error {
 		s, ok := t.sessions[update.Message.Chat.ID]
 		if !ok {
 			t.sessions[update.Message.Chat.ID] = session{
+				id:           update.Message.Chat.ID,
 				tags:         nil,
 				nextQuestion: 0,
 			}
@@ -76,38 +79,53 @@ func (t teleBot) Start() error {
 		switch update.Message.Text {
 		case "status":
 			msg.Text = "I'm ok."
-		case "/open":
-			msg.ReplyMarkup = numericKeyboard
-		case "/close":
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		case "/reload":
-			s.nextQuestion = 0
-		case "/start":
-			var m string
-			q := t.formats.GetQuestion(s.nextQuestion)
-			if q == nil {
-				m = "no questions left"
-			} else {
-				m = q.Question
-			}
-			msg.Text = m
-			msg.ReplyMarkup = makeAnswerKeyboard(q.Answers)
-			_, err = t.bot.Send(msg)
+			_, err := t.bot.Send(msg)
 			if err != nil {
 				t.logger.Errorw("error sending message %s", err)
 			}
-			s.nextQuestion++
+		case "/open":
+			msg.ReplyMarkup = numericKeyboard
+			_, err := t.bot.Send(msg)
+			if err != nil {
+				t.logger.Errorw("error sending message %s", err)
+			}
+		case "/close":
+			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+			_, err := t.bot.Send(msg)
+			if err != nil {
+				t.logger.Errorw("error sending message %s", err)
+			}
+		case "/reload":
+			s.nextQuestion = 0
+		case "/start":
+			t.askQuestion(s, msg)
 		default:
-			//		if it is answer make tags
-		}
+			// if waiting for answer make tags
+			if s.waitingAnswer {
 
-		_, err = t.bot.Send(msg)
-		if err != nil {
-			t.logger.Errorw("error sending message %s", err)
+			}
 		}
-		t.sessions[update.Message.Chat.ID] = s
 	}
 	return nil
+}
+
+func (t teleBot) askQuestion(s session, msg tgbotapi.MessageConfig) {
+	var m string
+	q := t.formats.GetQuestion(s.nextQuestion)
+	if q == nil {
+		m = "no questions left"
+	} else {
+		m = q.Question
+	}
+	msg.Text = m
+	msg.ReplyMarkup = makeAnswerKeyboard(q.Answers)
+	s.nextQuestion++
+	s.waitingAnswer = true
+	_, err := t.bot.Send(msg)
+	if err != nil {
+		t.logger.Errorw("error sending message %s", err)
+	}
+	t.sessions[s.id] = s
 }
 
 func NewBot(
