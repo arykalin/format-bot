@@ -11,7 +11,7 @@ import (
 
 type session struct {
 	id            int64
-	tags          []string
+	tags          []formatsPkg.Tag
 	nextQuestion  int
 	waitingAnswer bool
 }
@@ -51,7 +51,7 @@ type TeleBot interface {
 	Start() error
 }
 
-func (t teleBot) Start() error {
+func (t *teleBot) Start() error {
 	t.bot.Debug = true
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -67,7 +67,7 @@ func (t teleBot) Start() error {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "непонятная команда")
 
-		s, ok := t.sessions[update.Message.Chat.ID]
+		_, ok := t.sessions[update.Message.Chat.ID]
 		if !ok {
 			t.sessions[update.Message.Chat.ID] = session{
 				id:           update.Message.Chat.ID,
@@ -96,27 +96,53 @@ func (t teleBot) Start() error {
 				t.logger.Errorw("error sending message %s", err)
 			}
 		case "/reload":
-			s.nextQuestion = 0
+			//s.nextQuestion = 0
 		case "/start":
-			t.askQuestion(s, msg)
+			t.askQuestion(update.Message.Chat.ID, msg)
+		case "/tags":
+			s := t.sessions[update.Message.Chat.ID]
+			msg.Text = fmt.Sprintf("%v", s.tags)
+			_, err := t.bot.Send(msg)
+			if err != nil {
+				t.logger.Errorw("error sending message %s", err)
+			}
 		default:
+			s := t.sessions[update.Message.Chat.ID]
 			// if waiting for answer make tags
 			if s.waitingAnswer {
-
+				q := t.formats.GetQuestion(s.nextQuestion - 1)
+				for _, answer := range q.Answers {
+					if answer.Name == update.Message.Text {
+						s.tags = append(s.tags, answer.Tags...)
+					}
+				}
+				t.sessions[s.id] = s
+				s.waitingAnswer = false
+				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+				msg.Text = "Спасибо, следующий вопрос"
+				_, err := t.bot.Send(msg)
+				if err != nil {
+					t.logger.Errorw("error sending message %s", err)
+				}
+				t.askQuestion(update.Message.Chat.ID, msg)
 			}
 		}
 	}
 	return nil
 }
 
-func (t teleBot) askQuestion(s session, msg tgbotapi.MessageConfig) {
+func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
+	s := t.sessions[id]
 	var m string
 	q := t.formats.GetQuestion(s.nextQuestion)
 	if q == nil {
 		m = "no questions left"
-	} else {
-		m = q.Question
+		s.waitingAnswer = false
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		t.showFormats(s, msg)
+		return
 	}
+	m = q.Question
 	msg.Text = m
 	msg.ReplyMarkup = makeAnswerKeyboard(q.Answers)
 	s.nextQuestion++
@@ -126,6 +152,30 @@ func (t teleBot) askQuestion(s session, msg tgbotapi.MessageConfig) {
 		t.logger.Errorw("error sending message %s", err)
 	}
 	t.sessions[s.id] = s
+}
+
+func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
+	f, err := t.formats.GetFormats(s.tags)
+	if err != nil {
+		t.logger.Errorw("error getting formats %s", err)
+		msg.Text = fmt.Sprintf("error getting formats %s", err)
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+		return
+	}
+	for _, format := range f {
+		msg.Text = t.makeFormatMsg(format)
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+	}
+}
+
+func (t *teleBot) makeFormatMsg(format formatsPkg.Format) string {
+	return fmt.Sprintf("Формат:%s\n Описание: %s", format.Name, format.Description)
 }
 
 func NewBot(
