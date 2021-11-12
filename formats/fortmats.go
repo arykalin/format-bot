@@ -9,12 +9,20 @@ import (
 type Formats interface {
 	GetTags(Question) ([]Tag, error)
 	GetFormats([]Tag) ([]Format, error)
+	GetQuestion(num int) (question *Question)
 }
 
 type formats struct {
 	j         []byte
 	formats   []Format
 	questions []Question
+}
+
+func (f *formats) GetQuestion(num int) *Question {
+	if len(f.questions) < num {
+		return nil
+	}
+	return &f.questions[num]
 }
 
 func (f *formats) GetTags(question Question) ([]Tag, error) {

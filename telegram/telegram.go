@@ -10,10 +10,12 @@ import (
 )
 
 type session struct {
-	tags []string
+	tags         []string
+	nextQuestion int
 }
 
-type sessions map[string]session
+type sessions map[int64]session
+
 type teleBot struct {
 	chatID   int64
 	formats  formatsPkg.Formats
@@ -55,6 +57,14 @@ func (t teleBot) Start() error {
 		}
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
+		_, ok := t.sessions[update.Message.Chat.ID]
+		if !ok {
+			t.sessions[update.Message.Chat.ID] = session{
+				tags:         nil,
+				nextQuestion: 0,
+			}
+		}
+
 		switch update.Message.Text {
 		case "help":
 			msg.Text = "type /sayhi or /status."
@@ -66,9 +76,21 @@ func (t teleBot) Start() error {
 			msg.ReplyMarkup = numericKeyboard
 		case "/close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		case "/start":
+			var m string
+			q := t.formats.GetQuestion(t.sessions[update.Message.Chat.ID].nextQuestion)
+			if q == nil {
+				m = "no questions left"
+			} else {
+				m = q.Question
+			}
+			msg.Text = m
 		}
 
-		t.bot.Send(msg)
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
 	}
 	return nil
 }
