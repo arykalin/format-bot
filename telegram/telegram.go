@@ -72,6 +72,8 @@ func (t teleBot) Start() error {
 			msg.ReplyMarkup = numericKeyboard
 		case "/close":
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		case "/reload":
+			s.nextQuestion = 0
 		case "/start":
 			var m string
 			q := t.formats.GetQuestion(t.sessions[update.Message.Chat.ID].nextQuestion)
@@ -81,14 +83,14 @@ func (t teleBot) Start() error {
 				m = q.Question
 			}
 			msg.Text = m
-			s.nextQuestion = s.nextQuestion + 1
-			t.sessions[update.Message.Chat.ID] = s
+			s.nextQuestion++
 		}
 
 		_, err = t.bot.Send(msg)
 		if err != nil {
 			t.logger.Errorw("error sending message %s", err)
 		}
+		t.sessions[update.Message.Chat.ID] = s
 	}
 	return nil
 }
