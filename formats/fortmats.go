@@ -7,6 +7,8 @@ import (
 )
 
 type Formats interface {
+	GetTags(Question) ([]Tag, error)
+	GetFormats(*Tag) ([]Format, error)
 }
 
 type formats struct {
@@ -29,9 +31,14 @@ type Format struct {
 }
 
 type Question struct {
-	Number   int    `json:"number"`
-	Question string `json:"question"`
-	Tag      Tag    `json:"tag"`
+	Number   int      `json:"number"`
+	Question string   `json:"question"`
+	Answers  []Answer `json:"answers"`
+}
+
+type Answer struct {
+	Name string `json:"name"`
+	Tags []Tag  `json:"tags"`
 }
 
 func (f *formats) loadJson(path string) error {
