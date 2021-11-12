@@ -12,11 +12,13 @@ import (
 type session struct {
 	tags []string
 }
+
+type sessions map[string]session
 type teleBot struct {
 	chatID   int64
-	formats  []formatsPkg.Format
+	formats  formatsPkg.Formats
 	bot      *tgbotapi.BotAPI
-	sessions map[string]session
+	sessions sessions
 	logger   *zap.SugaredLogger
 }
 
@@ -71,16 +73,27 @@ func (t teleBot) Start() error {
 	return nil
 }
 
-func NewBot(chatID int64, token string, logger *zap.SugaredLogger) TeleBot {
+func NewBot(
+	chatID int64,
+	token string,
+	logger *zap.SugaredLogger,
+) TeleBot {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	f, err := formatsPkg.NewFormats("./formats/formats.json")
+	if err != nil {
+		log.Panic(err)
+	}
 	return &teleBot{
-		chatID: chatID,
-		bot:    bot,
-		logger: logger.Named("teletBot"),
+		chatID:   chatID,
+		formats:  f,
+		bot:      bot,
+		sessions: make(sessions),
+		logger:   logger.Named("teletBot"),
 	}
 }

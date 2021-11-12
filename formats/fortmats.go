@@ -51,7 +51,7 @@ func (f *formats) loadData() (err error) {
 	return nil
 }
 
-func NewFormats(path string) (*formats, error) {
+func NewFormats(path string) (Formats, error) {
 	f := &formats{}
 	err := f.loadJson(path)
 	if err != nil {
