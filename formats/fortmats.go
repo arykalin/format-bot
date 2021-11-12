@@ -24,7 +24,12 @@ func (f *formats) GetFormats(tags []Tag) (formats []Format, err error) {
 	if len(tags) == 0 {
 		return f.formats, nil
 	}
-	return f.formats, nil
+	for _, format := range f.formats {
+		if subset(tags, format.Tags) {
+			formats = append(formats, format)
+		}
+	}
+	return formats, nil
 }
 
 func (f *formats) loadJson(path string) error {
