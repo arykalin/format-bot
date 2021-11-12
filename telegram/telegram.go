@@ -26,19 +26,6 @@ type teleBot struct {
 	logger   *zap.SugaredLogger
 }
 
-var numericKeyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("1"),
-		tgbotapi.NewKeyboardButton("2"),
-		tgbotapi.NewKeyboardButton("3"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("4"),
-		tgbotapi.NewKeyboardButton("5"),
-		tgbotapi.NewKeyboardButton("6"),
-	),
-)
-
 func makeAnswerKeyboard(answers []formatsPkg.Answer) tgbotapi.ReplyKeyboardMarkup {
 	var a [][]tgbotapi.KeyboardButton
 	for _, answer := range answers {
@@ -99,25 +86,29 @@ func (t *teleBot) Start() error {
 			s := t.sessions[update.Message.Chat.ID]
 			// if waiting for answer make tags
 			if s.waitingAnswer {
-				q := t.formats.GetQuestion(s.nextQuestion - 1)
-				for _, answer := range q.Answers {
-					if answer.Name == update.Message.Text {
-						s.tags = append(s.tags, answer.Tags...)
-					}
-				}
-				t.sessions[s.id] = s
-				s.waitingAnswer = false
-				msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				msg.Text = "Спасибо, следующий вопрос"
-				_, err := t.bot.Send(msg)
-				if err != nil {
-					t.logger.Errorw("error sending message %s", err)
-				}
+				t.handleAnswer(s, update, msg)
 				t.askQuestion(update.Message.Chat.ID, msg)
 			}
 		}
 	}
 	return nil
+}
+
+func (t *teleBot) handleAnswer(s session, update tgbotapi.Update, msg tgbotapi.MessageConfig) {
+	q := t.formats.GetQuestion(s.nextQuestion - 1)
+	for _, answer := range q.Answers {
+		if answer.Name == update.Message.Text {
+			s.tags = append(s.tags, answer.Tags...)
+		}
+	}
+	t.sessions[s.id] = s
+	s.waitingAnswer = false
+	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+	msg.Text = "Спасибо, следующий вопрос"
+	_, err := t.bot.Send(msg)
+	if err != nil {
+		t.logger.Errorw("error sending message %s", err)
+	}
 }
 
 func (t *teleBot) reload(update tgbotapi.Update) {
