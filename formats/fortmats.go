@@ -19,7 +19,7 @@ type formats struct {
 }
 
 func (f *formats) GetQuestion(num int) *Question {
-	if len(f.questions) < num {
+	if len(f.questions) <= num {
 		return nil
 	}
 	return &f.questions[num]

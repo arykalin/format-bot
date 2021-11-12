@@ -55,9 +55,9 @@ func (t teleBot) Start() error {
 		if update.Message == nil {
 			continue
 		}
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "непонятная команда")
 
-		_, ok := t.sessions[update.Message.Chat.ID]
+		s, ok := t.sessions[update.Message.Chat.ID]
 		if !ok {
 			t.sessions[update.Message.Chat.ID] = session{
 				tags:         nil,
@@ -66,10 +66,6 @@ func (t teleBot) Start() error {
 		}
 
 		switch update.Message.Text {
-		case "help":
-			msg.Text = "type /sayhi or /status."
-		case "sayhi":
-			msg.Text = "Hi :)"
 		case "status":
 			msg.Text = "I'm ok."
 		case "/open":
@@ -85,6 +81,8 @@ func (t teleBot) Start() error {
 				m = q.Question
 			}
 			msg.Text = m
+			s.nextQuestion = s.nextQuestion + 1
+			t.sessions[update.Message.Chat.ID] = s
 		}
 
 		_, err = t.bot.Send(msg)
