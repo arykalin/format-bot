@@ -113,6 +113,7 @@ func (t *teleBot) handleAnswer(s session, update tgbotapi.Update, msg tgbotapi.M
 
 func (t *teleBot) reload(update tgbotapi.Update) {
 	s := t.sessions[update.Message.Chat.ID]
+	s.tags = []formatsPkg.Tag{}
 	s.waitingAnswer = false
 	s.nextQuestion = 0
 	t.sessions[update.Message.Chat.ID] = s
