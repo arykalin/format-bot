@@ -124,6 +124,7 @@ func (t *teleBot) reload(update tgbotapi.Update) {
 	s := t.sessions[update.Message.Chat.ID]
 	s.waitingAnswer = false
 	s.nextQuestion = 0
+	t.sessions[update.Message.Chat.ID] = s
 }
 
 func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
