@@ -83,23 +83,12 @@ func (t *teleBot) Start() error {
 			if err != nil {
 				t.logger.Errorw("error sending message %s", err)
 			}
-		case "/open":
-			msg.ReplyMarkup = numericKeyboard
-			_, err := t.bot.Send(msg)
-			if err != nil {
-				t.logger.Errorw("error sending message %s", err)
-			}
-		case "/close":
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-			_, err := t.bot.Send(msg)
-			if err != nil {
-				t.logger.Errorw("error sending message %s", err)
-			}
-		case "/reload":
-			//s.nextQuestion = 0
-		case "/start":
+		case "reload":
+			t.reload(update)
+		case "start":
+			t.reload(update)
 			t.askQuestion(update.Message.Chat.ID, msg)
-		case "/tags":
+		case "tags":
 			s := t.sessions[update.Message.Chat.ID]
 			msg.Text = fmt.Sprintf("%v", s.tags)
 			_, err := t.bot.Send(msg)
@@ -131,6 +120,12 @@ func (t *teleBot) Start() error {
 	return nil
 }
 
+func (t *teleBot) reload(update tgbotapi.Update) {
+	s := t.sessions[update.Message.Chat.ID]
+	s.waitingAnswer = false
+	s.nextQuestion = 0
+}
+
 func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	s := t.sessions[id]
 	var m string
@@ -155,6 +150,11 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 }
 
 func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
+	msg.Text = "Вопросы закончились, показываю подходящие форматы"
+	_, err := t.bot.Send(msg)
+	if err != nil {
+		t.logger.Errorw("error sending message %s", err)
+	}
 	f, err := t.formats.GetFormats(s.tags)
 	if err != nil {
 		t.logger.Errorw("error getting formats %s", err)
@@ -164,6 +164,14 @@ func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
 			t.logger.Errorw("error sending message %s", err)
 		}
 		return
+	}
+	if len(f) == 0 {
+		msg.Text = fmt.Sprintf("Нет подходящих форматов для тегов %v", s.tags)
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+
 	}
 	for _, format := range f {
 		msg.Text = t.makeFormatMsg(format)
@@ -175,7 +183,7 @@ func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
 }
 
 func (t *teleBot) makeFormatMsg(format formatsPkg.Format) string {
-	return fmt.Sprintf("Формат:%s\n Описание: %s", format.Name, format.Description)
+	return fmt.Sprintf("Формат:%s\n Описание: %s\n Теги: %s\n", format.Name, format.Description, format.Tags)
 }
 
 func NewBot(
