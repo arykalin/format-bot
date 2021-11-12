@@ -37,6 +37,10 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 )
 
+func makeAnswerKeyboard(question) {
+
+}
+
 type TeleBot interface {
 	Start() error
 }
