@@ -37,8 +37,12 @@ var numericKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 )
 
-func makeAnswerKeyboard(question) {
-
+func makeAnswerKeyboard(answers []string) {
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("1"),
+		tgbotapi.NewKeyboardButton("2"),
+		tgbotapi.NewKeyboardButton("3"),
+	)
 }
 
 type TeleBot interface {
@@ -80,14 +84,17 @@ func (t teleBot) Start() error {
 			s.nextQuestion = 0
 		case "/start":
 			var m string
-			q := t.formats.GetQuestion(t.sessions[update.Message.Chat.ID].nextQuestion)
+			q := t.formats.GetQuestion(s.nextQuestion)
 			if q == nil {
 				m = "no questions left"
 			} else {
 				m = q.Question
 			}
 			msg.Text = m
+			msg.ReplyMarkup = makeAnswerKeyboard(q.Answers)
 			s.nextQuestion++
+		default:
+			//		if it is answer make tags
 		}
 
 		_, err = t.bot.Send(msg)
