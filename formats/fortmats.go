@@ -17,6 +17,10 @@ type formats struct {
 	questions []Question
 }
 
+func (f *formats) GetTags(question Question) ([]Tag, error) {
+	panic("implement me")
+}
+
 func (f *formats) GetFormats(tags []Tag) (formats []Format, err error) {
 	if tags == nil {
 		return f.formats, nil
