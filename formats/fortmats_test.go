@@ -1,7 +1,6 @@
 package formats
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -48,7 +47,7 @@ func TestNewFormats(t *testing.T) {
 		want    *formats
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{name: "test1", args: args{path: "./formats.json"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,9 +56,8 @@ func TestNewFormats(t *testing.T) {
 				t.Errorf("NewFormats() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewFormats() got = %v, want %v", got, tt.want)
-			}
+			f, err := got.GetFormats(nil)
+			t.Logf("got formats %+v", f)
 		})
 	}
 }

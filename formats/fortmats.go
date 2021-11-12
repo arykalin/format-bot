@@ -8,7 +8,7 @@ import (
 
 type Formats interface {
 	GetTags(Question) ([]Tag, error)
-	GetFormats(*Tag) ([]Format, error)
+	GetFormats([]Tag) ([]Format, error)
 }
 
 type formats struct {
@@ -17,28 +17,14 @@ type formats struct {
 	questions []Question
 }
 
-type Tag string
-
-type data struct {
-	Formats   []Format   `json:"formats"`
-	Questions []Question `json:"questions"`
-}
-
-type Format struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Tags        []Tag  `json:"tags"`
-}
-
-type Question struct {
-	Number   int      `json:"number"`
-	Question string   `json:"question"`
-	Answers  []Answer `json:"answers"`
-}
-
-type Answer struct {
-	Name string `json:"name"`
-	Tags []Tag  `json:"tags"`
+func (f *formats) GetFormats(tags []Tag) (formats []Format, err error) {
+	if tags == nil {
+		return f.formats, nil
+	}
+	if len(tags) == 0 {
+		return f.formats, nil
+	}
+	return f.formats, nil
 }
 
 func (f *formats) loadJson(path string) error {
@@ -63,6 +49,10 @@ func (f *formats) loadData() (err error) {
 func NewFormats(path string) (*formats, error) {
 	f := &formats{}
 	err := f.loadJson(path)
+	if err != nil {
+		return nil, err
+	}
+	err = f.loadData()
 	if err != nil {
 		return nil, err
 	}
