@@ -72,7 +72,7 @@ func (t *teleBot) Start() error {
 			}
 		case "reload":
 			t.reload(update)
-		case "start":
+		case "/start", "start":
 			t.reload(update)
 			t.askQuestion(update.Message.Chat.ID, msg)
 		case "tags":
