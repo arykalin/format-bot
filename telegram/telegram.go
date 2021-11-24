@@ -94,6 +94,7 @@ func (t *teleBot) Start() error {
 	return nil
 }
 
+// handleAnswer is checking answers and append tags from it
 func (t *teleBot) handleAnswer(s session, update tgbotapi.Update, msg tgbotapi.MessageConfig) {
 	q := t.formats.GetQuestion(s.nextQuestion - 1)
 	for _, answer := range q.Answers {
