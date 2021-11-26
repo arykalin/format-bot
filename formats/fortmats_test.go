@@ -33,6 +33,18 @@ func Test_getFormats(t *testing.T) {
 			}
 			t.Logf("got Formats:\n %+v", f.formats)
 			t.Logf("got questions:\n %+v", f.questions)
+			var tags []string
+			for _, question := range f.questions {
+				for _, answer := range question.Answers {
+					for _, tag := range answer.Tags {
+						tags = append(tags, string(tag))
+					}
+				}
+			}
+			t.Logf("got tags:\n")
+			for _, tag := range tags {
+				t.Logf("%s", tag)
+			}
 		})
 	}
 }
