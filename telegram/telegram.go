@@ -183,7 +183,11 @@ func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
 }
 
 func (t *teleBot) makeFormatMsg(format formatsPkg.Format) string {
-	return fmt.Sprintf("Формат:%s\n Описание: %s\n Теги: %s\n", format.Name, format.Description, format.Tags)
+	var tags []string
+	for _, tag := range format.Tags {
+		tags = append(tags, fmt.Sprintf("\"%s\"", tag))
+	}
+	return fmt.Sprintf("Формат:%s\n Описание: %s\n Теги: %s\n", format.Name, format.Description, strings.Join(tags, ", "))
 }
 
 func NewBot(
