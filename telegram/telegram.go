@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	formatsPkg "github.com/arykalin/format-bot/formats"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -31,6 +32,7 @@ func makeAnswerKeyboard(answers []formatsPkg.Answer) tgbotapi.ReplyKeyboardMarku
 	for _, answer := range answers {
 		a = append(a, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(answer.Name)))
 	}
+	a = append(a, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton("Пропустить вопрос")))
 	return tgbotapi.NewReplyKeyboard(a...)
 }
 
@@ -160,7 +162,11 @@ func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
 		return
 	}
 	if len(f) == 0 {
-		msg.Text = fmt.Sprintf("Нет подходящих форматов для тегов %v", s.tags)
+		var tags []string
+		for _, tag := range s.tags {
+			tags = append(tags, fmt.Sprintf("\"%s\"", tag))
+		}
+		msg.Text = fmt.Sprintf("Нет подходящих форматов для тегов %s", strings.Join(tags, ", "))
 		_, err = t.bot.Send(msg)
 		if err != nil {
 			t.logger.Errorw("error sending message %s", err)
