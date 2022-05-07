@@ -218,11 +218,7 @@ func (t *teleBot) listFormats(id int64) {
 	return
 }
 
-func NewBot(
-	chatID int64,
-	token string,
-	logger *zap.SugaredLogger,
-) TeleBot {
+func NewBot(chatID int64, token string, sheetId string, logger *zap.SugaredLogger) TeleBot {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
@@ -230,7 +226,8 @@ func NewBot(
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	f, err := formats.NewFormats("11", "./formats/formats.json")
+	getter := data_getter.NewGetter("./internal/formats/data_getter/questions.json", sheetId)
+	f, err := formats.NewFormats(getter)
 	if err != nil {
 		log.Panic(err)
 	}

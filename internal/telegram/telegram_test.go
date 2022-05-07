@@ -21,7 +21,7 @@ func TestSendMessage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tl := NewBot(tt.args.chatID, tt.args.token, nil)
+			tl := NewBot(tt.args.chatID, tt.args.token, "", nil)
 			if err := tl.SendMessage(tt.args.text); (err != nil) != tt.wantErr {
 				t.Errorf("SendMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}

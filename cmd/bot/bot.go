@@ -21,6 +21,7 @@ type Bot interface {
 type Config struct {
 	TeleToken  string `yaml:"telegram_token"`
 	TeleChatID int64  `yaml:"telegram_chat_id"`
+	SheetID    string `yaml:"sheet_id"`
 }
 
 func (r *bot) Start() {
@@ -54,6 +55,7 @@ func (r *bot) Start() {
 	newTeleBot := telegram.NewBot(
 		config.TeleChatID,
 		config.TeleToken,
+		config.SheetID,
 		logger,
 	)
 	err = newTeleBot.Start()
