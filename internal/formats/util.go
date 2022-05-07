@@ -1,5 +1,7 @@
 package formats
 
+import "github.com/arykalin/format-bot/internal/formats/data_getter"
+
 func contains(s []data_getter.Tag, str data_getter.Tag) bool {
 	for _, v := range s {
 		if v == str {

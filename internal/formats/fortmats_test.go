@@ -6,54 +6,10 @@ import (
 	"github.com/arykalin/format-bot/internal/formats/data_getter"
 )
 
-func Test_getFormats(t *testing.T) {
-	type args struct {
-		path string
-	}
-	tests := []struct {
-		name        string
-		args        args
-		wantFormats []data_getter.Format
-		wantErr     bool
-	}{
-		{name: "test1", args: args{path: "./formats.json"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f := formats{}
-			err := f.loadJson(tt.args.path)
-			if err != nil {
-				t.Fatal(err)
-			}
-			err = f.loadJsonData()
-			if err != nil {
-				t.Fatal(err)
-			}
-			if (err != nil) != tt.wantErr {
-				t.Errorf("loadFormats() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			t.Logf("got Formats:\n %+v", f.formats)
-			t.Logf("got questions:\n %+v", f.questions)
-			var tags []string
-			for _, question := range f.questions {
-				for _, answer := range question.Answers {
-					for _, tag := range answer.Tags {
-						tags = append(tags, string(tag))
-					}
-				}
-			}
-			t.Logf("got tags:\n")
-			for _, tag := range tags {
-				t.Logf("%s", tag)
-			}
-		})
-	}
-}
-
 func TestNewFormats(t *testing.T) {
 	type args struct {
-		path string
+		path    string
+		sheetID string
 	}
 	tests := []struct {
 		name    string
@@ -61,11 +17,12 @@ func TestNewFormats(t *testing.T) {
 		want    *formats
 		wantErr bool
 	}{
-		{name: "test1", args: args{path: "./formats.json"}},
+		{name: "test1", args: args{path: "./data_getter/questions.json", sheetID: "19jaoKkiLRKH9HZ--HX2sE68LGIKt45alnwfrvxwpJNg"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewFormats()
+			getter := data_getter.NewGetter(tt.args.path, tt.args.sheetID)
+			got, err := NewFormats(getter)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewFormats() error = %v, wantErr %v", err, tt.wantErr)
 				return

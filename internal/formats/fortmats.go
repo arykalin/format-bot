@@ -1,6 +1,8 @@
 package formats
 
 import (
+	"fmt"
+
 	dataGetter "github.com/arykalin/format-bot/internal/formats/data_getter"
 )
 
@@ -41,5 +43,8 @@ func NewFormats(
 ) (_ Formats, err error) {
 	f := &formats{}
 	f.formats, f.questions, err = getter.GetData()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get formats: %w", err)
+	}
 	return f, nil
 }
