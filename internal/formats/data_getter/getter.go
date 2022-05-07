@@ -17,9 +17,17 @@ func (g *getter) GetData() (formats []Format, questions []Question, err error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get questions: %w", err)
 	}
-	return nil, questions, err
+	sheetDataLoader := newSheetData(g.formatsSheetID, "client_secret.json")
+	formats, err = sheetDataLoader.getFormats()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get formats: %w", err)
+	}
+	return formats, questions, err
 }
 
-func NewGetter() *getter {
-	return &getter{}
+func NewGetter(questionsPath, formatsSheetID string) *getter {
+	return &getter{
+		questionsPath:  questionsPath,
+		formatsSheetID: formatsSheetID,
+	}
 }
