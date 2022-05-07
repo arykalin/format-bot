@@ -203,17 +203,12 @@ func (t *teleBot) listFormats(id int64) {
 		}
 	}
 	for _, format := range formats {
-		msg := tgbotapi.NewMessage(id, fmt.Sprintf("Имя формата: %s", format.Name))
-		_, err = t.bot.Send(msg)
-		if err != nil {
-			t.logger.Errorw("error sending message %s", err)
-		}
-		msg = tgbotapi.NewMessage(id, fmt.Sprintf("Описание формата: %s", format.Description))
-		_, err = t.bot.Send(msg)
-		if err != nil {
-			t.logger.Errorw("error sending message %s", err)
-		}
-		msg = tgbotapi.NewMessage(id, fmt.Sprintf("Теги формата: %s", format.Tags))
+		msg := tgbotapi.NewMessage(id, fmt.Sprintf(
+			"Имя формата: %s\nОписание формата: %s\nТеги формата: %s",
+			format.Name,
+			format.Description,
+			format.Tags,
+		))
 		_, err = t.bot.Send(msg)
 		if err != nil {
 			t.logger.Errorw("error sending message %s", err)
