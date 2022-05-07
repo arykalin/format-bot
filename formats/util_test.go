@@ -1,43 +1,45 @@
 package formats
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_subset(t *testing.T) {
 	type args struct {
-		first  []Tag
-		second []Tag
+		first  []data_getter.Tag
+		second []data_getter.Tag
 	}
 	tests := []struct {
 		name string
 		args args
 		want bool
 	}{
-		{name: "a is subset of a,b,c", args: args{first: []Tag{
+		{name: "a is subset of a,b,c", args: args{first: []data_getter.Tag{
 			"a",
-		}, second: []Tag{
+		}, second: []data_getter.Tag{
 			"a",
 			"b",
 			"c",
 		}}, want: true},
-		{name: "d is not subset of a,b,c", args: args{first: []Tag{
+		{name: "d is not subset of a,b,c", args: args{first: []data_getter.Tag{
 			"d",
-		}, second: []Tag{
+		}, second: []data_getter.Tag{
 			"a",
 			"b",
 			"c",
 		}}, want: false},
-		{name: "a,d is not subset of a,b,c", args: args{first: []Tag{
+		{name: "a,d is not subset of a,b,c", args: args{first: []data_getter.Tag{
 			"a",
 			"d",
-		}, second: []Tag{
+		}, second: []data_getter.Tag{
 			"a",
 			"b",
 			"c",
 		}}, want: false},
-		{name: "a,b is subset of a,b,c", args: args{first: []Tag{
+		{name: "a,b is subset of a,b,c", args: args{first: []data_getter.Tag{
 			"a",
 			"b",
-		}, second: []Tag{
+		}, second: []data_getter.Tag{
 			"a",
 			"b",
 			"c",

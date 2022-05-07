@@ -1,4 +1,4 @@
-package formats
+package data_getter
 
 type Tag string
 

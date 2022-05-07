@@ -2,6 +2,8 @@ package formats
 
 import (
 	"testing"
+
+	"github.com/arykalin/format-bot/formats/data_getter"
 )
 
 func Test_getFormats(t *testing.T) {
@@ -11,7 +13,7 @@ func Test_getFormats(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		wantFormats []Format
+		wantFormats []data_getter.Format
 		wantErr     bool
 	}{
 		{name: "test1", args: args{path: "./formats.json"}},
@@ -23,7 +25,7 @@ func Test_getFormats(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = f.loadData()
+			err = f.loadJsonData()
 			if err != nil {
 				t.Fatal(err)
 			}

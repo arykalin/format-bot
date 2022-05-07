@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	formatsPkg "github.com/arykalin/format-bot/formats"
+	"github.com/arykalin/format-bot/formats/data_getter"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.uber.org/zap"
 )
 
 type session struct {
 	id            int64
-	tags          []formatsPkg.Tag
+	tags          []data_getter.Tag
 	nextQuestion  int
 	waitingAnswer bool
 }
@@ -27,7 +28,7 @@ type teleBot struct {
 	logger   *zap.SugaredLogger
 }
 
-func makeAnswerKeyboard(answers []formatsPkg.Answer) tgbotapi.ReplyKeyboardMarkup {
+func makeAnswerKeyboard(answers []data_getter.Answer) tgbotapi.ReplyKeyboardMarkup {
 	var a [][]tgbotapi.KeyboardButton
 	for _, answer := range answers {
 		a = append(a, tgbotapi.NewKeyboardButtonRow(tgbotapi.NewKeyboardButton(answer.Name)))
@@ -118,7 +119,7 @@ func (t *teleBot) handleAnswer(s session, update tgbotapi.Update, msg tgbotapi.M
 
 func (t *teleBot) reload(update tgbotapi.Update) {
 	s := t.sessions[update.Message.Chat.ID]
-	s.tags = []formatsPkg.Tag{}
+	s.tags = []data_getter.Tag{}
 	s.waitingAnswer = false
 	s.nextQuestion = 0
 	t.sessions[update.Message.Chat.ID] = s
@@ -184,7 +185,7 @@ func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
 	}
 }
 
-func (t *teleBot) makeFormatMsg(format formatsPkg.Format) string {
+func (t *teleBot) makeFormatMsg(format data_getter.Format) string {
 	var tags []string
 	for _, tag := range format.Tags {
 		tags = append(tags, fmt.Sprintf("\"%s\"", tag))
@@ -229,7 +230,7 @@ func NewBot(
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	f, err := formatsPkg.NewFormats()
+	f, err := formatsPkg.NewFormats("11", "./formats/formats.json")
 	if err != nil {
 		log.Panic(err)
 	}
