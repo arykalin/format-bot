@@ -4,31 +4,52 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"encoding/sheet"
+	"go.uber.org/zap"
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2/google"
+
+	"gopkg.in/Iwark/spreadsheet.v2"
 )
 
+type sheet struct {
+}
+
 type sheetData struct {
-	questionPath string
+	sheetID string
+	logger  *zap.SugaredLogger
+	service *spreadsheet.Service
 }
 
-func (j *sheetData) backupQuestions(questions []Question) error {
-	var d data
-	d.Questions = questions
+func (j *sheetData) getSheet(id string) (s spreadsheet.Spreadsheet, err error) {
+	data, err := ioutil.ReadFile("client_secret.json")
+	if err != nil {
+		return s, fmt.Errorf("failed to read client secret: %w", err)
+	}
+	conf, err := google.JWTConfigFromJSON(data, spreadsheet.Scope)
+	if err != nil {
+		return s, fmt.Errorf("failed to get jwt config: %w", err)
+	}
+	client := conf.Client(context.TODO())
 
-	return j.saveSheetData(d, j.questionPath+"-backup")
+	service := spreadsheet.NewServiceWithClient(client)
+	s, err = service.FetchSpreadsheet(id)
+	if err != nil {
+		return s, fmt.Errorf("failed to fetch spreadsheet: %w", err)
+	}
+	return s, nil
 }
 
-func (j *sheetData) getQuestions() (questions []Question, err error) {
-	jsData, err := j.loadSheet(j.questionPath)
+func (j *sheetData) getFormats() (formats []Format, err error) {
+	jsData, err := j.loadSheet(j.sheetID)
 	if err != nil {
 		return nil, err
 	}
-	questions, err = j.loadSheetData(jsData)
+	formats, err = j.loadSheetData(jsData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load formats %w", err)
 	}
 
-	return questions, nil
+	return formats, nil
 }
 
 func (j *sheetData) loadSheet(path string) ([]byte, error) {
@@ -39,29 +60,12 @@ func (j *sheetData) loadSheet(path string) ([]byte, error) {
 	return js, nil
 }
 
-func (j *sheetData) loadSheetData(js []byte) (questions []Question, err error) {
-	var d data
-	err = sheet.Unmarshal(js, &d)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal formats %w", err)
-	}
-	return d.Questions, nil
-}
-
-func (j *sheetData) saveSheetData(d data, path string) error {
-	b, err := sheet.Marshal(d)
-	if err != nil {
-		return fmt.Errorf("failed to marshal formats %w", err)
-	}
-	err = ioutil.WriteFile(path, b, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write formats %w", err)
-	}
-	return nil
+func (j *sheetData) loadSheetData(js []byte) (formats []Format, err error) {
+	return nil, err
 }
 
 func newSheetData(questionPath string) sheetData {
 	return sheetData{
-		questionPath: questionPath,
+		sheetID: questionPath,
 	}
 }
