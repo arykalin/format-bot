@@ -18,10 +18,6 @@ func (f *formats) GetQuestion(num int) *dataGetter.Question {
 	return &f.questions[num]
 }
 
-func (f *formats) GetTags(question dataGetter.Question) ([]dataGetter.Tag, error) {
-	panic("implement me")
-}
-
 func (f *formats) GetFormats(tags []dataGetter.Tag) (formats []dataGetter.Format, err error) {
 	if tags == nil {
 		return f.formats, nil
