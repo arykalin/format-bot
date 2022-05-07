@@ -3,7 +3,7 @@ package formats
 import (
 	"testing"
 
-	"github.com/arykalin/format-bot/formats/data_getter"
+	"github.com/arykalin/format-bot/internal/formats/data_getter"
 )
 
 func Test_getFormats(t *testing.T) {

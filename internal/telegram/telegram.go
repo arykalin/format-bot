@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	formatsPkg "github.com/arykalin/format-bot/formats"
-	"github.com/arykalin/format-bot/formats/data_getter"
+	"github.com/arykalin/format-bot/internal/formats"
+	"github.com/arykalin/format-bot/internal/formats/data_getter"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.uber.org/zap"
 )
@@ -22,7 +22,7 @@ type sessions map[int64]session
 
 type teleBot struct {
 	chatID   int64
-	formats  formatsPkg.Formats
+	formats  formats.Formats
 	bot      *tgbotapi.BotAPI
 	sessions sessions
 	logger   *zap.SugaredLogger
@@ -230,7 +230,7 @@ func NewBot(
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	f, err := formatsPkg.NewFormats("11", "./formats/formats.json")
+	f, err := formats.NewFormats("11", "./formats/formats.json")
 	if err != nil {
 		log.Panic(err)
 	}

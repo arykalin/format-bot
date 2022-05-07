@@ -1,6 +1,8 @@
 package formats
 
-import "github.com/arykalin/format-bot/formats/data_getter"
+import (
+	"github.com/arykalin/format-bot/internal/formats/data_getter"
+)
 
 type Formats interface {
 	GetTags(data_getter.Question) ([]data_getter.Tag, error)

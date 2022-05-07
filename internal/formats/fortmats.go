@@ -1,26 +1,26 @@
 package formats
 
 import (
-	"github.com/arykalin/format-bot/formats/data_getter"
+	data_getter2 "github.com/arykalin/format-bot/internal/formats/data_getter"
 )
 
 type formats struct {
-	formats   []data_getter.Format
-	questions []data_getter.Question
+	formats   []data_getter2.Format
+	questions []data_getter2.Question
 }
 
-func (f *formats) GetQuestion(num int) *data_getter.Question {
+func (f *formats) GetQuestion(num int) *data_getter2.Question {
 	if len(f.questions) <= num {
 		return nil
 	}
 	return &f.questions[num]
 }
 
-func (f *formats) GetTags(question data_getter.Question) ([]data_getter.Tag, error) {
+func (f *formats) GetTags(question data_getter2.Question) ([]data_getter2.Tag, error) {
 	panic("implement me")
 }
 
-func (f *formats) GetFormats(tags []data_getter.Tag) (formats []data_getter.Format, err error) {
+func (f *formats) GetFormats(tags []data_getter2.Tag) (formats []data_getter2.Format, err error) {
 	if tags == nil {
 		return f.formats, nil
 	}
@@ -37,7 +37,7 @@ func (f *formats) GetFormats(tags []data_getter.Tag) (formats []data_getter.Form
 
 //"./formats/formats.json"
 func NewFormats(
-	getter data_getter.Getter,
+	getter data_getter2.Getter,
 ) (_ Formats, err error) {
 	f := &formats{}
 	f.formats, f.questions, err = getter.GetData()
