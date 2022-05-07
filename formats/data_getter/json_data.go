@@ -6,26 +6,28 @@ import (
 	"io/ioutil"
 )
 
-type jsonData struct{}
-
-type JsonDater interface {
-	GetQuestions() (questions []Question, err error)
+type jsonData struct {
+	questionPath string
 }
 
-func (j *jsonData) GetQuestions() (questions []Question, err error) {
-	err := j.loadJson(questionPAth)
+func (j *jsonData) backupQuestions(questions []Question) error {
+	var d data
+	d.Questions = questions
+
+	return j.saveJsonData(d, j.questionPath+"-backup")
+}
+
+func (j *jsonData) getQuestions() (questions []Question, err error) {
+	jsData, err := j.loadJson(j.questionPath)
 	if err != nil {
 		return nil, err
 	}
-	d, err := j.loadJsonData()
+	questions, err = j.loadJsonData(jsData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load formats %w", err)
 	}
-	err = j.saveJsonData(d, questionPAth+"-backup")
-	if err != nil {
-		return nil, fmt.Errorf("failed to save formats %w", err)
-	}
-	return &jsonData{}
+
+	return questions, nil
 }
 
 func (j *jsonData) loadJson(path string) ([]byte, error) {
@@ -57,6 +59,8 @@ func (j *jsonData) saveJsonData(d data, path string) error {
 	return nil
 }
 
-func NewJsonData() JsonDater {
-	return &jsonData{}
+func newJsonData(questionPath string) jsonData {
+	return jsonData{
+		questionPath: questionPath,
+	}
 }
