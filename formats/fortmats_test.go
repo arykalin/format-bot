@@ -63,7 +63,7 @@ func TestNewFormats(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewFormats(tt.args.path)
+			got, err := NewFormats()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewFormats() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -63,9 +63,9 @@ func (f *formats) loadData() (err error) {
 	return nil
 }
 
-func NewFormats(path string) (Formats, error) {
+func NewFormats() (Formats, error) {
 	f := &formats{}
-	err := f.loadJson(path)
+	err := f.loadJson("./formats/formats.json")
 	if err != nil {
 		return nil, err
 	}

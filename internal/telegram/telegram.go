@@ -84,6 +84,8 @@ func (t *teleBot) Start() error {
 			if err != nil {
 				t.logger.Errorw("error sending message %s", err)
 			}
+		case "list":
+			t.listFormats(update.Message.Chat.ID)
 		default:
 			s := t.sessions[update.Message.Chat.ID]
 			// if waiting for answer make tags
@@ -190,6 +192,36 @@ func (t *teleBot) makeFormatMsg(format formatsPkg.Format) string {
 	return fmt.Sprintf("Формат:%s\n Описание: %s\n Теги: %s\n", format.Name, format.Description, strings.Join(tags, ", "))
 }
 
+func (t *teleBot) listFormats(id int64) {
+	formats, err := t.formats.GetFormats(nil)
+	if err != nil {
+		t.logger.Errorw("error getting formats %s", err)
+		msg := tgbotapi.NewMessage(id, fmt.Sprintf("error getting formats %s", err))
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+	}
+	for _, format := range formats {
+		msg := tgbotapi.NewMessage(id, fmt.Sprintf("Имя формата: %s", format.Name))
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+		msg = tgbotapi.NewMessage(id, fmt.Sprintf("Описание формата: %s", format.Description))
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+		msg = tgbotapi.NewMessage(id, fmt.Sprintf("Теги формата: %s", format.Tags))
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+	}
+	return
+}
+
 func NewBot(
 	chatID int64,
 	token string,
@@ -202,7 +234,7 @@ func NewBot(
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	f, err := formatsPkg.NewFormats("./formats/formats.json")
+	f, err := formatsPkg.NewFormats()
 	if err != nil {
 		log.Panic(err)
 	}
