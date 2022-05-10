@@ -66,7 +66,9 @@ func (t *teleBot) Start() error {
 			}
 		}
 
-		switch update.Message.Text {
+		s := strings.ToLower(update.Message.Text)
+		s = strings.ReplaceAll(s, "/", "")
+		switch s {
 		case "status":
 			msg.Text = "I'm ok."
 			_, err := t.bot.Send(msg)
@@ -75,7 +77,7 @@ func (t *teleBot) Start() error {
 			}
 		case "reload":
 			t.reload(update)
-		case "/start", "start":
+		case "start":
 			t.reload(update)
 			t.askQuestion(update.Message.Chat.ID, msg)
 		case "tags":
