@@ -130,7 +130,14 @@ func (t *teleBot) reload(update tgbotapi.Update) {
 func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	s := t.sessions[id]
 	var m string
+	// if only one format left don't ask next question and show formats
+	if gotFormats, err := t.formats.GetFormats(s.tags); err != nil && len(gotFormats) == 1 {
+		t.showFormats(s, msg)
+		return
+	}
+
 	q := t.formats.GetQuestion(s.nextQuestion)
+	// if no questions left show formats
 	if q == nil {
 		m = "no questions left"
 		s.waitingAnswer = false
