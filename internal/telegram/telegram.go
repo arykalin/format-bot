@@ -132,6 +132,8 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	var m string
 	// if only one format left don't ask next question and show formats
 	if gotFormats, err := t.formats.GetFormats(s.tags); err != nil && len(gotFormats) == 1 {
+		s.waitingAnswer = false
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		t.showFormats(s, msg)
 		return
 	}
@@ -139,7 +141,7 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	q := t.formats.GetQuestion(s.nextQuestion)
 	// if no questions left show formats
 	if q == nil {
-		m = "no questions left"
+		//m = "no questions left"
 		s.waitingAnswer = false
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		t.showFormats(s, msg)
