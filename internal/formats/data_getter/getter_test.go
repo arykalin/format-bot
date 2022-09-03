@@ -15,7 +15,7 @@ func Test_getter_GetData(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "test1", fields: fields{questionsPath: "./questions.json", formatsSheetID: "1SllTPG_dujOctppRwMFoKA6636OB10To4Gc8HhJMbS8"},
+			name: "test1", fields: fields{questionsPath: "./questions.json", formatsSheetID: "xxx"},
 		},
 	}
 	for _, tt := range tests {

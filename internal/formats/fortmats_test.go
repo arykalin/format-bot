@@ -17,7 +17,7 @@ func TestNewFormats(t *testing.T) {
 		want    *formats
 		wantErr bool
 	}{
-		{name: "test1", args: args{path: "./data_getter/questions.json", sheetID: "19jaoKkiLRKH9HZ--HX2sE68LGIKt45alnwfrvxwpJNg"}},
+		{name: "test1", args: args{path: "./data_getter/questions.json", sheetID: "xxx"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
