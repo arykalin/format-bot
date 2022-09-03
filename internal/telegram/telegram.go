@@ -26,6 +26,7 @@ type teleBot struct {
 	bot      *tgbotapi.BotAPI
 	sessions sessions
 	logger   *zap.SugaredLogger
+	getter   data_getter.Getter
 }
 
 func makeAnswerKeyboard(answers []data_getter.Answer) tgbotapi.ReplyKeyboardMarkup {
@@ -39,6 +40,7 @@ func makeAnswerKeyboard(answers []data_getter.Answer) tgbotapi.ReplyKeyboardMark
 
 type TeleBot interface {
 	Start() error
+	UpdateFormats() error
 }
 
 func (t *teleBot) Start() error {
@@ -101,6 +103,15 @@ func (t *teleBot) Start() error {
 	return nil
 }
 
+func (t *teleBot) UpdateFormats() error {
+	f, err := formats.NewFormats(t.getter)
+	if err != nil {
+		return fmt.Errorf("failed to get new formats: %w", err)
+	}
+	t.formats = f
+	return nil
+}
+
 // handleAnswer is checking answers and append tags from it
 func (t *teleBot) handleAnswer(s session, update tgbotapi.Update, msg tgbotapi.MessageConfig) {
 	q := t.formats.GetQuestion(s.nextQuestion - 1)
@@ -157,7 +168,7 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	msg.ReplyMarkup = makeAnswerKeyboard(q.Answers)
 	s.nextQuestion++
 	s.waitingAnswer = true
-	_, err = t.bot.Send(msg)
+	_, err := t.bot.Send(msg)
 	if err != nil {
 		t.logger.Errorw("error sending message %s", err)
 	}
@@ -243,13 +254,10 @@ func NewBot(chatID int64, token string, sheetId string, logger *zap.SugaredLogge
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	getter := data_getter.NewGetter("./internal/formats/data_getter/questions.json", sheetId)
-	f, err := formats.NewFormats(getter)
-	if err != nil {
-		log.Panic(err)
-	}
 	return &teleBot{
-		chatID:   chatID,
-		formats:  f,
+		getter: getter,
+		chatID: chatID,
+		//formats:  f,
 		bot:      bot,
 		sessions: make(sessions),
 		logger:   logger.Named("teletBot"),
