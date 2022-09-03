@@ -82,9 +82,9 @@ func (s *sheetData) getFormats() (formats []Format, err error) {
 		format.Description = description
 
 		var tags []string
-		for x := s.config.tagsStartIdx; x <= s.config.tagsEndIdx; x++ {
-			if len(sheet.Rows[i]) > x {
-				tags = append(tags, sheet.Rows[i][s.config.tagsIdx].Value)
+		for tagNum := s.config.tagsStartIdx; tagNum <= s.config.tagsEndIdx; tagNum++ {
+			if len(sheet.Rows[i]) > tagNum {
+				tags = append(tags, sheet.Rows[i][tagNum].Value)
 			}
 		}
 		format.Tags = s.getTags(tags)
@@ -93,12 +93,14 @@ func (s *sheetData) getFormats() (formats []Format, err error) {
 	return formats, nil
 }
 
-func (s *sheetData) getTags(tags string) (tagsList []Tag) {
-	t := strings.Split(tags, ",")
-	for _, tag := range t {
-		tag = strings.ReplaceAll(tag, "\"", "")
-		tag = strings.TrimSpace(tag)
-		tagsList = append(tagsList, Tag(tag))
+func (s *sheetData) getTags(tagGroups []string) (tagsList []Tag) {
+	for _, tagGroup := range tagGroups {
+		tags := strings.Split(tagGroup, ",")
+		for _, tag := range tags {
+			tag = strings.TrimSpace(tag)
+			tag = strings.ReplaceAll(tag, "\"", "")
+			tagsList = append(tagsList, Tag(tag))
+		}
 	}
 	return tagsList
 }
@@ -108,10 +110,12 @@ func newSheetData(sheetID, secretPath string) sheetData {
 		sheetID:    sheetID,
 		secretPath: secretPath,
 		config: sheetConfig{
-			nameIdx:        3,
-			descriptionIdx: 1,
-			tagsIdx:        2,
-			skip:           1,
+			creatorEmailIdx: 1,
+			nameIdx:         2,
+			descriptionIdx:  3,
+			tagsStartIdx:    4,
+			tagsEndIdx:      10,
+			skip:            1,
 		},
 	}
 }
