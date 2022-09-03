@@ -18,10 +18,12 @@ type sheetData struct {
 }
 
 type sheetConfig struct {
-	nameIdx        int
-	descriptionIdx int
-	tagsIdx        int
-	skip           int
+	creatorEmailIdx int
+	nameIdx         int
+	descriptionIdx  int
+	tagsStartIdx    int
+	tagsEndIdx      int
+	skip            int
 }
 
 // getSheet returns the google sheet with formats.
@@ -61,6 +63,12 @@ func (s *sheetData) getFormats() (formats []Format, err error) {
 		}
 		format := Format{}
 
+		var creatorEmail string
+		if len(sheet.Rows[i]) > s.config.creatorEmailIdx {
+			creatorEmail = sheet.Rows[i][s.config.creatorEmailIdx].Value
+		}
+		format.CreatorEmail = creatorEmail
+
 		var name string
 		if len(sheet.Rows[i]) > s.config.nameIdx {
 			name = sheet.Rows[i][s.config.nameIdx].Value
@@ -73,9 +81,11 @@ func (s *sheetData) getFormats() (formats []Format, err error) {
 		}
 		format.Description = description
 
-		var tags string
-		if len(sheet.Rows[i]) > s.config.tagsIdx {
-			tags = sheet.Rows[i][s.config.tagsIdx].Value
+		var tags []string
+		for x := s.config.tagsStartIdx; x <= s.config.tagsEndIdx; x++ {
+			if len(sheet.Rows[i]) > x {
+				tags = append(tags, sheet.Rows[i][s.config.tagsIdx].Value)
+			}
 		}
 		format.Tags = s.getTags(tags)
 		formats = append(formats, format)

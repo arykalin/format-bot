@@ -8,9 +8,10 @@ type data struct {
 }
 
 type Format struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Tags        []Tag  `json:"tags"`
+	CreatorEmail string `json:"creatorEmail"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Tags         []Tag  `json:"tags"`
 }
 
 type QuestionType uint8
