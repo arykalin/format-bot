@@ -189,6 +189,18 @@ func (t *teleBot) filterRules(s session, msg tgbotapi.MessageConfig) bool {
 		t.showFormats(s, msg)
 		return false
 	}
+	if gotFormats == nil && s.nextQuestion != 0 {
+		s.waitingAnswer = false
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg.Text = fmt.Sprintf("Нет ни одного формата под выбранные теги. Нет смысла дальше задавать вопросы.\n"+
+			"Теги: %s\n", s.tags)
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+		t.showFormats(s, msg)
+		return false
+	}
 	return true
 }
 
