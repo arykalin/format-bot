@@ -142,21 +142,10 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	var err error
 	s := t.sessions[id]
 	var m string
-	//TODO: https://trello.com/c/LZI840VO
-	// if only one format left don't ask next question and show formats
-	gotFormats, err := t.formats.GetFormats(s.tags)
-	if err != nil {
-		t.logger.Errorw("error getting formats %s", err)
-	}
-	if len(gotFormats) == 1 && t.sessions[id].nextQuestion != 0 {
-		s.waitingAnswer = false
-		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		msg.Text = "Остался только один формат для выбранных тегов. Нет смысла дальше задавать вопросы"
-		_, err = t.bot.Send(msg)
-		if err != nil {
-			t.logger.Errorw("error sending message %s", err)
-		}
-		t.showFormats(s, msg)
+
+	// Filter rules
+	passed := t.filterRules(s, msg)
+	if !passed {
 		return
 	}
 
@@ -179,6 +168,28 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 		t.logger.Errorw("error sending message %s", err)
 	}
 	t.sessions[s.id] = s
+}
+
+func (t *teleBot) filterRules(s session, msg tgbotapi.MessageConfig) bool {
+	//TODO: https://trello.com/c/LZI840VO
+	// if only one format left don't ask next question and show formats
+	gotFormats, err := t.formats.GetFormats(s.tags)
+	if err != nil {
+		t.logger.Errorw("error getting formats %s", err)
+		return false
+	}
+	if len(gotFormats) == 1 && s.nextQuestion != 0 {
+		s.waitingAnswer = false
+		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg.Text = "Остался только один формат для выбранных тегов. Нет смысла дальше задавать вопросы"
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
+		t.showFormats(s, msg)
+		return false
+	}
+	return true
 }
 
 func (t *teleBot) showFormats(s session, msg tgbotapi.MessageConfig) {
