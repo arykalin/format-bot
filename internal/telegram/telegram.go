@@ -148,9 +148,14 @@ func (t *teleBot) askQuestion(id int64, msg tgbotapi.MessageConfig) {
 	if err != nil {
 		t.logger.Errorw("error getting formats %s", err)
 	}
-	if len(gotFormats) == 1 {
+	if len(gotFormats) == 1 && t.sessions[id].nextQuestion != 0 {
 		s.waitingAnswer = false
 		msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg.Text = "Остался только один формат для выбранных тегов. Нет смысла дальше задавать вопросы"
+		_, err = t.bot.Send(msg)
+		if err != nil {
+			t.logger.Errorw("error sending message %s", err)
+		}
 		t.showFormats(s, msg)
 		return
 	}
