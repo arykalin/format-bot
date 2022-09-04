@@ -9,5 +9,12 @@ build:
 	mkdir -p $(BUILD_PATH)/formats/
 	cp -rv ./internal/formats/data_getter/questions.json $(BUILD_PATH)/formats/
 
+build-dev:
+	rm -f $(BUILD_PATH)/format-bot
+	go build $(GO_TAGS) $(GO_LDFLAGS) -o $(BUILD_PATH)/format-bot ./
+	cp -v config-dev.yml $(BUILD_PATH)/
+	mkdir -p $(BUILD_PATH)/formats/
+	cp -rv ./internal/formats/data_getter/questions.json $(BUILD_PATH)/formats/
+
 clean:
 	rm -rf $(BUILD_PATH)
